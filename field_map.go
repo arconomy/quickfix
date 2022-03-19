@@ -57,8 +57,8 @@ func (m *FieldMap) initWithOrdering(ordering tagOrder) {
 
 //Tags returns all of the Field Tags in this FieldMap
 func (m FieldMap) Tags() []Tag {
-	defer m.Unlock()
-	m.RWMutex.Lock()
+	defer m.RUnlock()
+	m.RWMutex.RLock()
 	tags := make([]Tag, 0, len(m.tagLookup))
 	for t := range m.tagLookup {
 		tags = append(tags, t)
@@ -207,6 +207,8 @@ func (m *FieldMap) SetString(tag Tag, value string) *FieldMap {
 
 //Clear purges all fields from field map
 func (m *FieldMap) Clear() {
+	defer m.Unlock()
+	m.Lock()
 	m.tags = m.tags[0:0]
 	for k := range m.tagLookup {
 		delete(m.tagLookup, k)
@@ -215,6 +217,8 @@ func (m *FieldMap) Clear() {
 
 //CopyInto overwrites the given FieldMap with this one
 func (m *FieldMap) CopyInto(to *FieldMap) {
+	defer m.RUnlock()
+	m.RLock()
 	to.tagLookup = make(map[Tag]field)
 	for tag, f := range m.tagLookup {
 		clone := make(field, 1)
@@ -260,6 +264,9 @@ func (m *FieldMap) Set(field FieldWriter) *FieldMap {
 
 //SetGroup is a setter specific to group fields
 func (m *FieldMap) SetGroup(field FieldGroupWriter) *FieldMap {
+	defer m.RWMutex.Unlock()
+	m.RWMutex.Lock()
+
 	_, ok := m.tagLookup[field.Tag()]
 	if !ok {
 		m.tags = append(m.tags, field.Tag())
@@ -274,7 +281,7 @@ func (m *FieldMap) sortedTags() []Tag {
 }
 
 func (m FieldMap) write(buffer *bytes.Buffer) {
-	defer m.Unlock()
+	defer m.RWMutex.Unlock()
 	m.RWMutex.Lock()
 	for _, tag := range m.sortedTags() {
 		if f, ok := m.tagLookup[tag]; ok {
@@ -284,6 +291,9 @@ func (m FieldMap) write(buffer *bytes.Buffer) {
 }
 
 func (m FieldMap) total() int {
+	defer m.RWMutex.RUnlock()
+	m.RWMutex.RLock()
+
 	total := 0
 	for _, fields := range m.tagLookup {
 		for _, tv := range fields {
@@ -299,6 +309,8 @@ func (m FieldMap) total() int {
 }
 
 func (m FieldMap) length() int {
+	defer m.RWMutex.RUnlock()
+	m.RWMutex.RLock()
 	length := 0
 	for _, fields := range m.tagLookup {
 		for _, tv := range fields {
