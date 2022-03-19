@@ -14,7 +14,6 @@ import (
 	"github.com/quickfixgo/quickfix/config"
 )
 
-#Test
 //Acceptor accepts connections from FIX clients and manages the associated sessions.
 type Acceptor struct {
 	app                   Application
