@@ -52,14 +52,11 @@ func (i *Initiator) Start() (err error) {
 
 //Stop Initiator.
 func (i *Initiator) Stop() {
-	select {
-	case <-i.stopChan:
-		//closed already
-		return
-	default:
+	for _, session := range i.sessions {
+		ResetSessions(session.sessionID)
 	}
+
 	close(i.stopChan)
-	i.wg.Wait()
 }
 
 //NewInitiator creates and initializes a new Initiator.
@@ -189,6 +186,7 @@ func (i *Initiator) handleConnection(session *session, tlsConfig *tls.Config, di
 		select {
 		case <-disconnected:
 		case <-i.stopChan:
+			close(msgOut)
 			return
 		}
 

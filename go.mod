@@ -8,6 +8,10 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.7
 	github.com/pkg/errors v0.9.1
+	github.com/quickfixgo/enum v0.0.0-20210629025633-9afc8539baba
+	github.com/quickfixgo/field v0.0.0-20171007195410-74cea5ec78c7
+	github.com/quickfixgo/fix44 v0.0.0-20171007213039-f090a1006218
+	github.com/quickfixgo/tag v0.0.0-20171007194743-cbb465760521
 	github.com/shopspring/decimal v1.2.0
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0

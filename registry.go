@@ -40,6 +40,11 @@ func Send(m Messagable) (err error) {
 }
 
 //SendToTarget sends a message based on the sessionID. Convenient for use in FromApp since it provides a session ID for incoming messages
+func ResetSessions(sessionID SessionID) {
+	delete(sessions, sessionID)
+}
+
+// SendToTarget sends a message based on the sessionID. Convenient for use in FromApp since it provides a session ID for incoming messages
 func SendToTarget(m Messagable, sessionID SessionID) error {
 	msg := m.ToMessage()
 	session, ok := lookupSession(sessionID)

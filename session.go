@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/quickfixgo/enum"
 	"github.com/quickfixgo/quickfix/datadictionary"
 	"github.com/quickfixgo/quickfix/internal"
 )
@@ -695,7 +696,6 @@ func (s *session) onDisconnect() {
 	}
 
 	if s.messageOut != nil {
-		close(s.messageOut)
 		s.messageOut = nil
 	}
 
@@ -771,6 +771,16 @@ func (s *session) run() {
 			if !ok {
 				s.Disconnected(s)
 			} else {
+				//capture logout message
+				m := NewMessage()
+				err := ParseMessage(m, fixIn.bytes)
+				if err == nil {
+					if m.IsMsgTypeOf(string(enum.MsgType_LOGOUT)) {
+						s.application.FromAdmin(m, s.sessionID)
+					} else if m.IsMsgTypeOf(string(enum.MsgType_LOGON)) {
+						s.application.FromAdmin(m, s.sessionID)
+					}
+				}
 				s.Incoming(s, fixIn)
 			}
 
@@ -781,4 +791,6 @@ func (s *session) run() {
 			s.CheckSessionTime(s, now)
 		}
 	}
+
+	fmt.Printf("Disconnected")
 }

@@ -1,14 +1,11 @@
 package quickfix
 
-import "io"
+import (
+	"io"
+)
 
 func writeLoop(connection io.Writer, messageOut chan []byte, log Log) {
-	for {
-		msg, ok := <-messageOut
-		if !ok {
-			return
-		}
-
+	for msg := range messageOut {
 		if _, err := connection.Write(msg); err != nil {
 			log.OnEvent(err.Error())
 		}
